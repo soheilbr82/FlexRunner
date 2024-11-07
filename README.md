@@ -1,3 +1,5 @@
+<img src=".github/Logo.jpg" alt="FlexRunner Logo" width="200" height="200">
+
 # FlexRunner: Ascalable self-hosted runner(s) to enable in-house automated testing
 
 The instruction below helps you to build and instantiate self-hosted runners to run automated testing and to maintain your needed test data and artifacts within the self-hosted runner(s), securely.
