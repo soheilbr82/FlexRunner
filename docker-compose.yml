@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    args:
+      GITHUB_REPO: ${GITHUB_REPO}
+      WORK_PATH: ${WORK_PATH}
+      RUNNER_VERSION: ${RUNNER_VERSION}
+      RUNNER_USER: ${RUNNER_USER}
+      RUNNER_USER_ID: ${RUNNER_USER_ID}
+      RUNNER_GROUP: ${RUNNER_GROUP}
+      RUNNER_GROUP_ID: ${RUNNER_GROUP_ID}
+      ARTIFACTS_DIR: ${ARTIFACTS_DIR}
+      DATA_DIR: ${DATA_DIR}
+
+
+      image: "${PROJECT_NAME}-${SERVICE_NAME}-${RUNNER_USER:-defaultuser}.app"
+      container_name: "${SERVICE_NAME}-${RUNNER_USER:-defaultuser}"
+      hostname: "${PROJECT_NAME}-${SERVICE_NAME}-${SERVER_NAME}"
+      restart: always
+      cap_drop:
+        - NET_ADMIN
+        - SYS_ADMIN
+        - CHOWN
+      deploy:
+        resources:
+          limits:
+            cpus: "2"
+            memory: "2G"
+          reservations:
+            cpus: "0.25"
+            memory: "500M"
+      
+      user: "${RUNNER_USER:-defaultuser}:${RUNNER_GROUP:-defaultgroup}"
+      environment:
+        - GITHUB_REPO=${GITHUB_REPO}
+        - WORK_PATH=${WORK_PATH}
+        - RUNNER_VERSION=${RUNNER_VERSION}
+        - RUNNER_USER=${RUNNER_USER}
+        - RUNNER_USER_ID=${RUNNER_USER_ID}
+        - RUNNER_GROUP=${RUNNER_GROUP}
+        - RUNNER_GROUP_ID=${RUNNER_GROUP_ID}
+        - ARTIFACTS_DIR=${ARTIFACTS_DIR}
+        - DATA_DIR=${DATA_DIR}
+      
+      entrypoint: /actions-runner/entrypoint.sh
+      healthcheck:
+        test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+      
+      networks:
+        runner_network:
+          driver: bridge
+          name: "network-${SERVICE_NAME}-${RUNNER_USER:-defaultuser}"
